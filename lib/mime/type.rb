@@ -112,6 +112,7 @@ class MIME::Type
     self.docs         ||= nil
     self.encoding     ||= :default
     self.references   ||= []
+    self.xrefs        ||= {}
 
     yield self if block_given?
   end
@@ -311,6 +312,12 @@ class MIME::Type
     self.references = r
   end
 
+  # The cross-references list for this MIME::Type.
+  attr_reader :xrefs
+  def xrefs=(r) # :nodoc:
+    @xrefs = r
+  end
+
   # The decoded URL list for this MIME::Type.
   #
   # The special URL value IANA will be translated into:
@@ -332,7 +339,8 @@ class MIME::Type
   # These values will be accessible through #urls, which always returns an
   # array.
   def urls
-    @references.map do |el|
+    MIME.deprecated(self, __method__, "and will be replaced with #xref_urls")
+    references.map do |el|
       case el
       when %r{^IANA$}
         IANA_URL % [ @media_type, @sub_type ]
@@ -352,6 +360,35 @@ class MIME::Type
         el
       end
     end
+  end
+
+  # The decoded cross-reference URL list for this MIME::Type.
+  def xref_urls
+    xrefs.map { |(type, values)|
+      case type
+      when 'rfc'
+        values.map { |data| "http://www.iana.org/go/#{data}" }
+      when 'draft'
+        values.map { |data|
+          "http://www.iana.org/go/#{data.sub(/\ARFC/, 'draft')}"
+        }
+      when 'rfc-errata'
+        values.map { |data|
+          "http://www.rfc-editor.org/errata_search.php?eid=#{data}"
+        }
+      when 'person'
+        values.map { |data|
+          "http://www.iana.org/assignments/media-types/media-types.xhtml##{data}"
+        }
+      when 'template'
+        values.map { |data|
+          "http://www.iana.org/assignments/media-types/#{data}"
+        }
+      when 'uri', 'text'
+        values
+      end
+
+    }.flatten
   end
 
   # Prior to BCP 178 (RFC 6648), it could be assumed that MIME content types
@@ -484,10 +521,9 @@ class MIME::Type
       coder['use-instead']  = use_instead if use_instead
     end
     coder['references']     = references unless references.empty?
+    coder['xrefs']          = xrefs unless xrefs.empty?
     coder['registered']     = registered?
-    if signature?
-      coder['signature']      = signature?
-    end
+    coder['signature']      = signature? if signature?
     coder['system']         = @system if @system
     coder
   end
@@ -499,6 +535,7 @@ class MIME::Type
     self.extensions   = coder['extensions'] || []
     self.obsolete     = coder['obsolete']
     self.references   = coder['references'] || []
+    self.xrefs        = coder['xrefs'] || {}
     self.registered   = coder['registered']
     self.signature    = coder['signature']
     self.system       = coder['system']
