@@ -415,8 +415,10 @@ class TestMIMEType < Minitest::Test
   end
 
   def test_to_json
-    assert_equal('{"content-type":"a/b","encoding":"base64","registered":true}',
-                 make('a/b').to_json)
+    json = JSON.parse(make('a/b').to_json)
+    assert_equal('a/b', json['content-type'])
+    assert_equal('base64', json['encoding'])
+    assert(json['registered'])
   end
 
   def test_to_s

@@ -28,10 +28,6 @@ class TestMIMETypesLoader < Minitest::Test
                  types['audio/vnd.qcelp'].first.use_instead)
   end
 
-  def test_load_yaml
-    assert_correctly_loaded(@loader.load_yaml)
-  end
-
   def test_load_json
     assert_correctly_loaded(@loader.load_json)
   end

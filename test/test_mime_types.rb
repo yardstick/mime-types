@@ -35,23 +35,23 @@ class TestMIMETypes < Minitest::Test
   end
 
   def test_index_with_complete_flag
-    assert_empty(@mime_types['text/vnd.fly', complete: true])
-    refute_empty(@mime_types['text/plain', complete: true])
+    assert_empty(@mime_types['text/vnd.fly', { :complete => true }])
+    refute_empty(@mime_types['text/plain', { :complete => true }])
   end
 
   def test_index_with_registered_flag
     assert_empty(@mime_types['application/x-wordperfect6.1',
-                             registered: true])
+                             { :registered => true }])
     refute_empty(@mime_types['application/x-www-form-urlencoded',
-                             registered: true])
-    refute_empty(@mime_types['application/gzip', registered: true])
+                             { :registered => true }])
+    refute_empty(@mime_types['application/gzip', { :registered => true }])
     refute_equal(@mime_types['application/gzip'].size,
-                 @mime_types['application/gzip', registered: true])
+                 @mime_types['application/gzip', { :registered => true }])
   end
 
   def test_index_with_platform_flag
     assert_deprecated("MIME::Types#[]", "using the :platform flag") do
-      assert_empty(MIME::Types['text/plain', platform: true])
+      assert_empty(MIME::Types['text/plain', { :platform => true }])
     end
   end
   def test_add

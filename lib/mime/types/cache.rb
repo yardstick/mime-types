@@ -19,7 +19,7 @@ class MIME::Types
       cache_file = cache_file || ENV['RUBY_MIME_TYPES_CACHE']
       return nil unless cache_file and File.exists?(cache_file)
 
-      cache = Marshal.load(File.binread(cache_file))
+      cache = Marshal.load(File.read(cache_file))
       if cache.version == MIME::Types::VERSION
         Marshal.load(cache.data)
       else
@@ -58,8 +58,8 @@ class MIME::Types
   # exists solely to satisfy that need.
   class Container < Hash # :nodoc:
     def initialize
-      super
-      self.default_proc = ->(h, k) { h[k] = [] }
+      default_proc = lambda { |h, k| h[k] = [] }
+      super(&default_proc)
     end
 
     def marshal_dump

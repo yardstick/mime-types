@@ -31,23 +31,6 @@ class MIME::Types::Loader
     @container = container || MIME::Types.new
   end
 
-  # Loads a MIME::Types registry from YAML files (<tt>*.yml</tt> or
-  # <tt>*.yaml</tt>) recursively found in +path+.
-  #
-  # It is expected that the YAML objects contained within the registry array
-  # will be tagged as <tt>!ruby/object:MIME::Type</tt>.
-  #
-  # Note that the YAML format is about 2½ times *slower* than either the v1
-  # format or the JSON format.
-  #
-  # NOTE: The purpose of this format is purely for maintenance reasons.
-  def load_yaml
-    Dir[yaml_path].sort.each do |f|
-      container.add(*self.class.load_from_yaml(f), :silent)
-    end
-    container
-  end
-
   # Loads a MIME::Types registry from JSON files (<tt>*.json</tt>)
   # recursively found in +path+.
   #
@@ -61,7 +44,7 @@ class MIME::Types::Loader
       types = self.class.load_from_json(f).map { |type|
         MIME::Type.new(type)
       }
-      container.add(*types, :silent)
+      container.add(*(types << :silent))
     end
     container
   end
@@ -181,25 +164,6 @@ class MIME::Types::Loader
       mime
     end
 
-    # Loads MIME::Types from a single YAML file.
-    #
-    # It is expected that the YAML objects contained within the registry
-    # array will be tagged as <tt>!ruby/object:MIME::Type</tt>.
-    #
-    # Note that the YAML format is about 2½ times *slower* than either the v1
-    # format or the JSON format.
-    #
-    # NOTE: The purpose of this format is purely for maintenance reasons.
-    def load_from_yaml(filename)
-      begin
-        require 'psych'
-      rescue LoadError
-        nil
-      end
-      require 'yaml'
-      YAML.load(read_file(filename))
-    end
-
     # Loads MIME::Types from a single JSON file.
     #
     # It is expected that the JSON objects will be an array of hash objects.
@@ -212,15 +176,11 @@ class MIME::Types::Loader
 
     private
     def read_file(filename)
-      File.open(filename, 'r:UTF-8:-') { |f| f.read }
+      File.read(filename)
     end
   end
 
   private
-  def yaml_path
-    File.join(path, '*.y{,a}ml')
-  end
-
   def json_path
     File.join(path, '*.json')
   end

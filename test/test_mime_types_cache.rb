@@ -68,7 +68,7 @@ class TestMIMETypesCache < Minitest::Test
 
   def test_cache_load_failure
     MIME::Types::Cache.save
-    data = File.binread(@cache_file).reverse
+    data = File.read(@cache_file).reverse
     File.open(@cache_file, 'wb') { |f| f.write(data) }
     MIME::Types.instance_variable_set(:@__types__, nil)
     assert_output(nil, /Could not load MIME::Types cache: incompatible marshal file format/) do

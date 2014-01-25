@@ -112,7 +112,7 @@ class MIME::Types
   #   puts "\nMIME::Types['text/plain']"
   #   MIME::Types['text/plain'].each { |t| puts t.to_a.join(", ") }
   #
-  #   puts "\nMIME::Types[/^image/, complete: true]"
+  #   puts "\nMIME::Types[/^image/, { :complete => true }]"
   #   MIME::Types[/^image/, :complete => true].each do |t|
   #     puts t.to_a.join(", ")
   #   end
@@ -192,9 +192,9 @@ class MIME::Types
         nil
       when MIME::Types
         variants = mime_type.instance_variable_get(:@type_variants)
-        add(*variants.values.flatten, quiet)
+        add(*(variants.values.flatten << quiet))
       when Array
-        add(*mime_type, quiet)
+        add(*(mime_type << quiet))
       else
         add_type(mime_type, quiet)
       end
@@ -301,7 +301,7 @@ class MIME::Types
   end
 
   def match(pattern)
-    @type_variants.select { |k, v| k =~ pattern }.values.flatten
+    @type_variants.select { |k, v| k =~ pattern }.map(&:last).flatten
   end
 
   load_default_mime_types unless lazy_load?

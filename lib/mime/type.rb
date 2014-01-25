@@ -219,7 +219,11 @@ class MIME::Type
   # The list of extensions which are known to be used for this MIME::Type.
   # Non-array values will be coerced into an array with #to_a. Array values
   # will be flattened, +nil+ values removed, and made unique.
-  attr_reader :extensions
+  # attr_reader :extensions
+  def extensions
+    @extensions ||= []
+  end
+
   def extensions=(ext) # :nodoc:
     @extensions = [ext].flatten.compact.sort.uniq
   end
